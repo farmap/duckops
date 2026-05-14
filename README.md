@@ -36,3 +36,9 @@ npm create astro@latest
 (create in empty ./web dir & select blog template)
 run dev server: npm run dev
 ```
+
+# add astro plugins
+```
+npx astro add mdx
+npx astro add tailwind
+```
