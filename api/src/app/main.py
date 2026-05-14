@@ -10,7 +10,7 @@ from uuid import UUID
 from fastapi import FastAPI
 
 from app.schemas.post import Post, PostCreate, PostUpdate
-from app.schemas.metric import MetricResponse, MetricDataset
+from app.schemas.metric import MetricResponse
 
 
 app = FastAPI(

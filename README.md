@@ -1,5 +1,9 @@
 # DuckOps
 Blog Project combining insights into devops, and data discovery using DuckDb. The goal is to flesh out this blog with snippets and charts that I may find useful, as well as info I may discover on the way.  Essentially, this is my ultimate take on dogfooding.
+# Languages
+
+ - python >= 3.11
+ - node >= 24
 
 # initial project layout
 ```
@@ -22,4 +26,13 @@ duckops/
 
 ```
 fastapi-codegen --input ./api/spec/openapi.yml --output ./build
+```
+# init astro project from blog template
+
+```
+nvm use 24.12.0
+cd ./web
+npm create astro@latest
+(create in empty ./web dir & select blog template)
+run dev server: npm run dev
 ```
