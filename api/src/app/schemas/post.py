@@ -9,7 +9,7 @@ from uuid import UUID
 
 from pydantic import AwareDatetime, BaseModel, Field
 
-class Post(BaseModel):
+class PostGet(BaseModel):
     id: Optional[UUID] = Field(None, examples=['550e8400-e29b-41d4-a716-446655440000'])
     slug: Optional[str] = Field(None, examples=['my-first-post'])
     title: Optional[str] = Field(None, examples=['Understanding SQLAlchemy'])
