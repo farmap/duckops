@@ -14,5 +14,12 @@ duckops/
 │   └── src/components/ # ECharts islands
 ├── data/               # Python scripts for data aggregation
 │   └── raw/            # .parquet files (git-ignored if large)
+├── build/              # for codegen from spec output
 └── docker-compose.yml  # Orchestrates API, Web, and Postgres
+```
+
+# build fastapi code from openapi specification
+
+```
+fastapi-codegen --input ./api/spec/openapi.yml --output ./build
 ```
