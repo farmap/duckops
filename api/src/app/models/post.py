@@ -5,10 +5,7 @@ from app.utils import generate_uuid4
 from datetime import datetime, timezone
 from app.services.db_services import Base
 from app.models.mixins import CRUDMixin
-
-def aware_utcnow():
-    return datetime.now(timezone.utc)
-
+from app.models.time_helpers import UTCDateTime
 
 
 class Post(Base, CRUDMixin):
@@ -19,4 +16,4 @@ class Post(Base, CRUDMixin):
     title = Column(String, nullable=False)
     content = Column(Text, nullable=False) # Stores MDX/Markdown
     data_path = Column(String, nullable=True) # Path for DuckDB/Parquet
-    published_at = Column(DateTime, default=aware_utcnow)
+    published_at = Column(UTCDateTime, default=datetime.now(timezone.utc))
