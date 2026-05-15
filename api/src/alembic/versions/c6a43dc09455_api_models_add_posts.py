@@ -1,8 +1,8 @@
 """api models add posts
 
-Revision ID: 839aaea7d106
+Revision ID: c6a43dc09455
 Revises: 
-Create Date: 2026-05-14 18:35:44.910685
+Create Date: 2026-05-14 19:27:38.865182
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '839aaea7d106'
+revision: str = 'c6a43dc09455'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

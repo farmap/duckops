@@ -45,11 +45,13 @@ def create_app() -> FastAPI:
         return all_posts
 
     @app.post('/posts', response_model=None, responses={'201': {'model': PostGet}})
-    def post_posts(body: PostCreate) -> Optional[PostGet]:
+    def post_posts(body: PostCreate, db: Session = Depends(get_db), ) -> Optional[PostGet]:
         """
         Create a new post
         """
-        pass
+        Post.create(db, **body.model_dump())
+        created_db = Post.get_by_name(db,body.slug,unique_field="slug")
+        return created_db
 
     @app.get('/posts/{id}', response_model=PostGet)
     def get_posts_id(id: UUID) -> PostGet:

@@ -1,10 +1,13 @@
 from sqlalchemy import Column, String, Text, DateTime, UUID
+from sqlalchemy.sql.functions import now
 
 from app.utils import generate_uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 from app.services.db_services import Base
 from app.models.mixins import CRUDMixin
 
+def aware_utcnow():
+    return datetime.now(timezone.utc)
 
 
 
@@ -16,4 +19,4 @@ class Post(Base, CRUDMixin):
     title = Column(String, nullable=False)
     content = Column(Text, nullable=False) # Stores MDX/Markdown
     data_path = Column(String, nullable=True) # Path for DuckDB/Parquet
-    published_at = Column(DateTime, default=datetime.utcnow)
+    published_at = Column(DateTime, default=aware_utcnow)
