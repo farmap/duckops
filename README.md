@@ -42,3 +42,4 @@ run dev server: npm run dev
 npx astro add mdx
 npx astro add tailwind
 ```
+# new stuff
