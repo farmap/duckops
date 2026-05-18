@@ -1,3 +1,4 @@
+import duckdb
 from fastapi import FastAPI, Depends, HTTPException
 from app.services.db_services import get_db
 from sqlalchemy.orm import Session
@@ -30,16 +31,26 @@ def create_app() -> FastAPI:
         return []
 
     @app.get('/metrics/{post_slug}', response_model=MetricResponse)
-    def get_metrics_post_slug(post_slug: str) -> MetricResponse:
+    def get_metrics_post_slug(post_slug: str, db: Session = Depends(get_db)) -> MetricResponse:
         """
         Get data for a specific blog post
         """
-        return MetricResponse(
-            labels=["2026-05-18T00:00:00Z"],
-            datasets=[
-                {"label": "Process Lag", "data": [0.5], "unit": "ms"}
-            ]
-        )
+        post = Post.get_by_name(db, post_slug, unique_field="slug")
+        if not post or not post.data_path:
+            raise HTTPException(status_code=404, detail="Metrics not found")
+        
+        try:
+            query = f"SELECT timestamp, value FROM read_parquet('{post.data_path}') ORDER BY timestamp"
+            df = duckdb.query(query).df()
+            
+            return MetricResponse(
+                labels=df['timestamp'].astype(str).tolist(),
+                datasets=[
+                    {"label": "Process Lag", "data": df['value'].tolist(), "unit": "ms"}
+                ]
+            )
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error processing data: {str(e)}")
 
     @app.get('/posts', tags=["posts"], response_model=List[PostGet])
     def get_posts(db: Session = Depends(get_db), ) -> List[PostGet]:

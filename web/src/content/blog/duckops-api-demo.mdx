@@ -6,6 +6,7 @@ heroImage: '../../assets/blog-placeholder-2.jpg'
 ---
 
 import PostApiData from '../../components/PostApiData.astro';
+import MetricsChart from '../../components/MetricsChart.tsx';
 
 Welcome to the first interactive DuckOps blog post! 🦆
 
@@ -19,4 +20,8 @@ Below, we've embedded an Astro component that fetches data directly from our Fas
 
 Isn't that awesome? The data you see above is not hardcoded—it's pulled fresh from the SQLite database driving our backend API.
 
-In the future, we will use this exact same pattern to embed complex ECharts, visualizing data aggregated by DuckDB.
+## Interactive ECharts with DuckDB & Parquet
+
+And here is the magic of the Lakehouse architecture! Below is a React component that hits the `/api/metrics/{slug}` endpoint. The backend uses **DuckDB** to execute analytical queries over the raw Parquet file stored at the `data_path` shown above.
+
+<MetricsChart slug="duckops-api-demo" client:load />

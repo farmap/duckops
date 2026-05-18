@@ -7,13 +7,15 @@ import { loadEnv } from 'vite';
 
 import tailwindcss from '@tailwindcss/vite';
 
+import react from '@astrojs/react';
+
 const env = loadEnv(process.env.NODE_ENV || 'development', process.cwd(), '');
 const apiUrl = env.API_URL || 'http://localhost:8000';
 
 // https://astro.build/config
 export default defineConfig({
     site: 'https://example.com',
-    integrations: [mdx(), sitemap()],
+    integrations: [mdx(), sitemap(), react()],
 
     fonts: [
         {
