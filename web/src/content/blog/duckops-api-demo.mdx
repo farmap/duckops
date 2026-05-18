@@ -1,0 +1,22 @@
+---
+title: 'Interactive MDX with FastAPI Integration'
+description: 'Demonstrating how MDX can fetch live data from our DuckOps backend'
+pubDate: 'May 18 2026'
+heroImage: '../../assets/blog-placeholder-2.jpg'
+---
+
+import PostApiData from '../../components/PostApiData.astro';
+
+Welcome to the first interactive DuckOps blog post! 🦆
+
+Astro allows us to seamlessly weave together markdown content with dynamic React, Vue, or native Astro components. To truly achieve our goal of showcasing a Lakehouse architecture, we need our content layer to talk directly to our data engine.
+
+## Fetching from the Backend
+
+Below, we've embedded an Astro component that fetches data directly from our FastAPI backend during the render process. It calls the `/posts/{id}` endpoint and displays the response in a sleek, beautifully styled card.
+
+<PostApiData id="f0a2c31d14ec4ff8863df7d55f2913e7" />
+
+Isn't that awesome? The data you see above is not hardcoded—it's pulled fresh from the SQLite database driving our backend API.
+
+In the future, we will use this exact same pattern to embed complex ECharts, visualizing data aggregated by DuckDB.
