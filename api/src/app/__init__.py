@@ -10,8 +10,10 @@ from app.services.db_services import get_db
 
 from app.schemas.post import PostGet, PostCreate, PostUpdate
 from app.schemas.metric import MetricResponse
+from app.schemas.user import UserResponse, UserCreate, UserUpdate
 
 from app.models.post import Post
+from app.models.user import User
 
 
 def create_app() -> FastAPI:
@@ -23,12 +25,51 @@ def create_app() -> FastAPI:
     async def root():
         return {"message": "Hello World"}
 
-    @app.get('/config/user', response_model=None)
-    def get_config_user() -> None:
+    @app.get('/config/user', tags=["users"], response_model=List[UserResponse])
+    def get_users(db: Session = Depends(get_db)) -> List[UserResponse]:
         """
         Retrieve list of all users
         """
-        return []
+        return User.get_all(db)
+
+    @app.post('/config/user', tags=["users"], response_model=UserResponse, status_code=201)
+    def create_user(user: UserCreate, db: Session = Depends(get_db)) -> UserResponse:
+        """
+        Create a new user
+        """
+        return User.create(db, **user.model_dump())
+
+    @app.get('/config/user/{id}', tags=["users"], response_model=UserResponse)
+    def get_user_by_id(id: UUID, db: Session = Depends(get_db)) -> UserResponse:
+        """
+        Retrieve a user by ID
+        """
+        user = User.get_by_id(db, id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user
+
+    @app.put('/config/user/{id}', tags=["users"], response_model=UserResponse)
+    def update_user(id: UUID, user_update: UserUpdate, db: Session = Depends(get_db)) -> UserResponse:
+        """
+        Update a user
+        """
+        user = User.get_by_id(db, id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        update_data = user_update.model_dump(exclude_unset=True)
+        return User.update(db, id, **update_data)
+
+    @app.delete('/config/user/{id}', tags=["users"], status_code=204)
+    def delete_user(id: UUID, db: Session = Depends(get_db)) -> None:
+        """
+        Delete a user
+        """
+        user = User.get_by_id(db, id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        User.delete(db, id)
 
     @app.get('/metrics/{post_slug}', response_model=MetricResponse)
     def get_metrics_post_slug(post_slug: str, db: Session = Depends(get_db)) -> MetricResponse:

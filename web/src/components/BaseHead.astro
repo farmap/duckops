@@ -55,3 +55,32 @@ const { title, description, image = FallbackImage } = Astro.props;
 <meta property="twitter:title" content={title} />
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={new URL(image.src, Astro.url)} />
+
+<script is:inline>
+  const setDarkMode = (document) => {
+    const userStr = localStorage.getItem('duckops-user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else if (user.theme === 'light') {
+          document.documentElement.classList.remove('dark');
+        } else {
+          // system default
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        }
+      } catch (e) {
+        document.documentElement.classList.add('dark');
+      }
+    } else {
+      document.documentElement.classList.add('dark'); // default dark
+    }
+  };
+  setDarkMode(document);
+  document.addEventListener('astro:after-swap', () => setDarkMode(document));
+</script>
