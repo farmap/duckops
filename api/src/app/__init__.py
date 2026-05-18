@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from app.services.db_services import get_db
 from sqlalchemy.orm import Session
 from app.config import settings
@@ -27,14 +27,19 @@ def create_app() -> FastAPI:
         """
         Retrieve list of all users
         """
-        pass
+        return []
 
     @app.get('/metrics/{post_slug}', response_model=MetricResponse)
     def get_metrics_post_slug(post_slug: str) -> MetricResponse:
         """
         Get data for a specific blog post
         """
-        pass
+        return MetricResponse(
+            labels=["2026-05-18T00:00:00Z"],
+            datasets=[
+                {"label": "Process Lag", "data": [0.5], "unit": "ms"}
+            ]
+        )
 
     @app.get('/posts', tags=["posts"], response_model=List[PostGet])
     def get_posts(db: Session = Depends(get_db), ) -> List[PostGet]:
@@ -54,24 +59,33 @@ def create_app() -> FastAPI:
         return created_db
 
     @app.get('/posts/{id}', response_model=PostGet)
-    def get_posts_id(id: UUID) -> PostGet:
+    def get_posts_id(id: UUID, db: Session = Depends(get_db)) -> PostGet:
         """
         Get a post by UUID
         """
-        pass
+        post = Post.get_by_id(db, id)
+        if not post:
+            raise HTTPException(status_code=404, detail="Post not found")
+        return post
 
     @app.put('/posts/{id}', response_model=None)
-    def put_posts_id(id: UUID, body: PostUpdate = ...) -> None:
+    def put_posts_id(id: UUID, body: PostUpdate, db: Session = Depends(get_db)) -> None:
         """
         Update a post
         """
-        pass
+        post = Post.get_by_id(db, id)
+        if not post:
+            raise HTTPException(status_code=404, detail="Post not found")
+        post.update(db, **body.model_dump(exclude_unset=True))
 
     @app.delete('/posts/{id}', response_model=None)
-    def delete_posts_id(id: UUID) -> None:
+    def delete_posts_id(id: UUID, db: Session = Depends(get_db)) -> None:
         """
         Delete a post
         """
-        pass
+        post = Post.get_by_id(db, id)
+        if not post:
+            raise HTTPException(status_code=404, detail="Post not found")
+        post.delete(db)
 
     return app

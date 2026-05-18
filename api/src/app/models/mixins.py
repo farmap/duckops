@@ -1,3 +1,4 @@
+import uuid
 from sqlalchemy.orm import Session
 
 
@@ -11,6 +12,14 @@ class CRUDMixin(object):
                  isinstance(id, (int, float))),
         ):
             return db_session.query(cls).get(int(id))
+        elif isinstance(id, uuid.UUID):
+            return db_session.query(cls).get(id)
+        elif isinstance(id, str):
+            try:
+                val = uuid.UUID(id)
+                return db_session.query(cls).get(val)
+            except ValueError:
+                pass
         return None
 
     @classmethod
