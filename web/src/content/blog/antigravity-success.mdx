@@ -1,0 +1,42 @@
+---
+title: 'Displaying Antigravity Success'
+description: 'This pages output is the Antigravity walkthrough artifact which was in fact responsible for generating a working interactive page'
+pubDate: 'May 18 2026'
+heroImage: '../../assets/google-antigravity-logo-icon-png.jpg'
+---
+
+# DuckDB Analytics & ECharts Walkthrough
+
+The Lakehouse architecture is now fully functional! We successfully integrated Parquet data generation, DuckDB analytical querying, and a highly interactive ECharts visualization using React inside our Astro frontend.
+
+## Overview of Changes
+
+### 1. Parquet Data Generation
+I created a script (`api/src/generate_sample_data.py`) that uses `numpy` and `pandas` to generate a simulated 1-week time-series dataset of "Process Lag", complete with a randomized variance spike. The dataset was then saved directly as a Parquet file at `data/raw/duckops-api-demo.parquet` using DuckDB's `COPY` command.
+
+The script also automatically linked this `data_path` to the SQLite `Post` record we previously seeded.
+
+### 2. DuckDB Backend Querying
+[__init__.py](file:///home/farma/programming/projects/duckops/api/src/app/__init__.py)
+The `GET /metrics/{post_slug}` endpoint now:
+- Looks up the post by slug to locate the attached `data_path`.
+- Executes an ultra-fast analytical query using DuckDB: `SELECT timestamp, value FROM read_parquet(...)`.
+- Packages the resulting DataFrame into the `MetricResponse` schema with arrays of timestamps and data points.
+
+### 3. Interactive React ECharts Island
+[MetricsChart.tsx](file:///home/farma/programming/projects/duckops/web/src/components/MetricsChart.tsx)
+- Bootstrapped React support in Astro by installing `@astrojs/react` and configuring it in `astro.config.mjs`.
+- Built the `MetricsChart` component using `echarts-for-react`.
+- The component mounts on the client (`client:load`) and cleanly hits the `/api/metrics/{slug}` proxy endpoint to securely fetch the data from FastAPI.
+- Features include a sleek dark-mode aesthetic with a dynamic smooth line graph, data zoom controls (slider and mouse wheel), crosshair tooltips, and linear gradients.
+
+### 4. Integration
+[duckops-api-demo.mdx](file:///home/farma/programming/projects/duckops/web/src/content/blog/duckops-api-demo.mdx)
+- Embedded the React component at the bottom of our post.
+
+## Verification
+- Dependencies (`duckdb`, `pyarrow`, `react`, `echarts`) were cleanly installed.
+- The React ECharts component properly fetches from the proxy URL you configured earlier, demonstrating the full power of Astro Islands combined with a Python Lakehouse backend!
+
+> [!TIP]
+> Just like before, Astro's hot-module-reloading might need a quick `npm run dev` restart if it didn't automatically pick up the new React component integration. Restart the server and navigate to your blog post to see the graph!
