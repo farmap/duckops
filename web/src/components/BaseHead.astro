@@ -57,28 +57,46 @@ const { title, description, image = FallbackImage } = Astro.props;
 <meta property="twitter:image" content={new URL(image.src, Astro.url)} />
 
 <script is:inline>
-  const setDarkMode = (document) => {
+  const setDarkMode = async (document) => {
     const userStr = localStorage.getItem('duckops-user');
+    let userId = null;
+    let localTheme = 'dark'; // default
+
     if (userStr) {
       try {
         const user = JSON.parse(userStr);
-        if (user.theme === 'dark') {
-          document.documentElement.classList.add('dark');
-        } else if (user.theme === 'light') {
-          document.documentElement.classList.remove('dark');
-        } else {
-          // system default
-          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.classList.add('dark');
-          } else {
-            document.documentElement.classList.remove('dark');
+        userId = user.id;
+        if (user.theme) localTheme = user.theme;
+      } catch (e) {}
+    }
+
+    // 1. Apply local cached theme immediately to prevent FOUC
+    const applyThemeClass = (theme) => {
+      if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    };
+    applyThemeClass(localTheme);
+
+    // 2. Fetch latest theme from API in background if we have a user
+    if (userId) {
+      try {
+        const response = await fetch('/api/config/user/' + userId);
+        if (response.ok) {
+          const freshUser = await response.json();
+          // Update local cache
+          localStorage.setItem('duckops-user', JSON.stringify(freshUser));
+          
+          // Apply new theme if it changed
+          if (freshUser.theme !== localTheme) {
+            applyThemeClass(freshUser.theme);
           }
         }
       } catch (e) {
-        document.documentElement.classList.add('dark');
+        console.error("Failed to fetch latest user config", e);
       }
-    } else {
-      document.documentElement.classList.add('dark'); // default dark
     }
   };
   setDarkMode(document);
