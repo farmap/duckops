@@ -11,7 +11,7 @@ let error = null;
 try {
   // Astro components run on the server, so fetch() requires an absolute URL.
   // We use the API_URL environment variable here directly.
-  const apiUrl = import.meta.env.API_URL || 'http://127.0.0.1:8000';
+  const apiUrl = import.meta.env.API_URL || "http://127.0.0.1:8000";
   const response = await fetch(`${apiUrl}/posts/${id}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch data: ${response.status}`);
@@ -87,9 +87,10 @@ try {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
+                  transform="translate(6, 6) scale(0.5)"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  stroke-width="2"
+                  stroke-width="1"
                   d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"
                 />
               </svg>

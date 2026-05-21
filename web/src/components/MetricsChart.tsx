@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 
+const SERIES_COLORS = [
+  '56, 189, 248',  // Cyan/Sky
+  '52, 211, 153',  // Emerald/Mint
+  '129, 140, 248', // Indigo/Purple
+  '251, 146, 60',  // Orange/Amber
+  '251, 113, 133', // Rose/Pink
+];
+
 interface MetricResponse {
   labels: string[];
   datasets: { label: string; data: number[]; unit: string }[];
@@ -49,6 +57,12 @@ export default function MetricsChart({ slug }: { slug: string }) {
       textStyle: { color: '#f8fafc' },
       axisPointer: { type: 'cross', label: { backgroundColor: '#334155' } }
     },
+    legend: {
+      data: data.datasets.map(ds => ds.label || ''),
+      textStyle: { color: '#94a3b8' },
+      top: '0%',
+      right: '4%'
+    },
     grid: {
       left: '3%',
       right: '4%',
@@ -80,31 +94,34 @@ export default function MetricsChart({ slug }: { slug: string }) {
         start: 50,
         end: 100,
         borderColor: '#334155',
-        fillerColor: 'rgba(56, 189, 248, 0.2)',
+        fillerColor: 'rgba(56, 189, 248, 0.1)',
         handleStyle: { color: '#38bdf8' },
         textStyle: { color: '#94a3b8' },
         bottom: 0
       }
     ],
-    series: data.datasets.map(ds => ({
-      name: ds.label,
-      type: 'line',
-      smooth: true,
-      symbol: 'none',
-      itemStyle: { color: '#38bdf8' },
-      areaStyle: {
-        color: {
-          type: 'linear',
-          x: 0, y: 0, x2: 0, y2: 1,
-          colorStops: [{
-              offset: 0, color: 'rgba(56, 189, 248, 0.5)'
-          }, {
-              offset: 1, color: 'rgba(56, 189, 248, 0.0)'
-          }]
-        }
-      },
-      data: ds.data
-    }))
+    series: data.datasets.map((ds, i) => {
+      const rgbColor = SERIES_COLORS[i % SERIES_COLORS.length];
+      return {
+        name: ds.label,
+        type: 'line',
+        smooth: true,
+        symbol: 'none',
+        itemStyle: { color: `rgb(${rgbColor})` },
+        areaStyle: {
+          color: {
+            type: 'linear',
+            x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [{
+                offset: 0, color: `rgba(${rgbColor}, 0.2)`
+            }, {
+                offset: 1, color: `rgba(${rgbColor}, 0.0)`
+            }]
+          }
+        },
+        data: ds.data
+      };
+    })
   };
 
   return (
