@@ -81,15 +81,38 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=404, detail="Metrics not found")
         
         try:
-            query = f"SELECT timestamp, value FROM read_parquet('{post.data_path}') ORDER BY timestamp"
-            df = duckdb.query(query).df()
+            # Check the columns in the parquet file
+            rel = duckdb.read_parquet(post.data_path)
+            columns = rel.columns
             
-            return MetricResponse(
-                labels=df['timestamp'].astype(str).tolist(),
-                datasets=[
-                    {"label": "Process Lag", "data": df['value'].tolist(), "unit": "ms"}
-                ]
-            )
+            if "gpu_name" in columns:
+                query = f"SELECT timestamp, gpu_name, value FROM read_parquet('{post.data_path}') ORDER BY timestamp, gpu_name"
+                df = duckdb.query(query).df()
+                
+                # Extract sorted list of unique timestamps as strings
+                labels = sorted(df['timestamp'].astype(str).unique().tolist())
+                
+                datasets = []
+                gpus = sorted(df['gpu_name'].unique().tolist())
+                for gpu in gpus:
+                    gpu_df = df[df['gpu_name'] == gpu].sort_values('timestamp')
+                    datasets.append({
+                        "label": gpu,
+                        "data": gpu_df['value'].tolist(),
+                        "unit": "instances/hour"
+                    })
+                
+                return MetricResponse(labels=labels, datasets=datasets)
+            else:
+                query = f"SELECT timestamp, value FROM read_parquet('{post.data_path}') ORDER BY timestamp"
+                df = duckdb.query(query).df()
+                
+                return MetricResponse(
+                    labels=df['timestamp'].astype(str).tolist(),
+                    datasets=[
+                        {"label": "Process Lag", "data": df['value'].tolist(), "unit": "ms"}
+                    ]
+                )
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error processing data: {str(e)}")
 
