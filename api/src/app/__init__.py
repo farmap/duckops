@@ -14,6 +14,7 @@ from app.schemas.user import UserResponse, UserCreate, UserUpdate
 
 from app.models.post import Post
 from app.models.user import User
+from app.services.blog_mdx import generate_blog_mdx, delete_blog_mdx
 
 
 def create_app() -> FastAPI:
@@ -124,13 +125,21 @@ def create_app() -> FastAPI:
         all_posts = Post.get_all(db)
         return all_posts
 
-    @app.post('/posts', response_model=None, responses={'201': {'model': PostGet}})
+    @app.post('/posts', response_model=PostGet, status_code=201)
     def post_posts(body: PostCreate, db: Session = Depends(get_db), ) -> Optional[PostGet]:
         """
         Create a new post
         """
         Post.create(db, **body.model_dump())
         created_db = Post.get_by_name(db,body.slug,unique_field="slug")
+        if created_db:
+            generate_blog_mdx(
+                post_id=str(created_db.id),
+                slug=created_db.slug,
+                title=created_db.title,
+                content=created_db.content,
+                data_path=created_db.data_path
+            )
         return created_db
 
     @app.get('/posts/{id}', response_model=PostGet)
@@ -152,8 +161,19 @@ def create_app() -> FastAPI:
         if not post:
             raise HTTPException(status_code=404, detail="Post not found")
         post.update(db, **body.model_dump(exclude_unset=True))
+        
+        # Re-generate the MDX file with the updated values
+        updated_post = Post.get_by_id(db, id)
+        if updated_post:
+            generate_blog_mdx(
+                post_id=str(updated_post.id),
+                slug=updated_post.slug,
+                title=updated_post.title,
+                content=updated_post.content,
+                data_path=updated_post.data_path
+            )
 
-    @app.delete('/posts/{id}', response_model=None)
+    @app.delete('/posts/{id}', response_model=None, status_code=204)
     def delete_posts_id(id: UUID, db: Session = Depends(get_db)) -> None:
         """
         Delete a post
@@ -161,6 +181,10 @@ def create_app() -> FastAPI:
         post = Post.get_by_id(db, id)
         if not post:
             raise HTTPException(status_code=404, detail="Post not found")
+            
+        # Delete the MDX post from disk on database deletion
+        delete_blog_mdx(post.slug)
+        
         post.delete(db)
 
     return app

@@ -17,7 +17,7 @@ def run_tests():
         "data_path": "/tmp/test.parquet"
     })
     print("CREATE POST:", response.status_code, response.json())
-    assert response.status_code == 200 
+    assert response.status_code == 201 
     post_id = response.json()["id"]
 
     # 2. Get the post
@@ -41,8 +41,8 @@ def run_tests():
     
     # 5. Delete the post
     response = client.delete(f"/posts/{post_id}")
-    print("DELETE POST:", response.status_code, response.json())
-    assert response.status_code == 200
+    print("DELETE POST:", response.status_code)
+    assert response.status_code == 204
 
     # 6. Get deleted post -> 404
     response = client.get(f"/posts/{post_id}")
