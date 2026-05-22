@@ -1,0 +1,82 @@
+---
+title: 'Generating parquet file from duckdb queries'
+description: 'Automatically generated post for Generating parquet file from duckdb queries'
+pubDate: 'May 22 2026'
+heroImage: '../../assets/blog-placeholder-2.jpg'
+---
+
+import PostApiData from '../../components/PostApiData.astro';
+import MetricsChart from '../../components/MetricsChart.tsx';
+
+# Parquet Data from DuckDB!
+
+This post was generated with API call, and links to data stored as parquet file `instances_silver_agg.parquet`
+
+## Overview of Changes
+
+### 1. Parquet Data Generation
+
+I got data from a csv, put into pandas, than aggregated with duckdb to export as parquet
+
+```python
+import pandas as pd
+import duckdb
+my_date_format = "%Y-%m-%d %H:%M:%S.%f%z"
+my_df = pd.read_csv('/mnt/HC_Volume_105622703/projects/duckops/api/src/instance/SILVER_INSTANCES_DATES.csv', delimiter=';', encoding='latin-1', parse_dates=['start_time', 'end_time', 'last_updated'], date_format=my_date_format)
+```
+#### Testing it works:
+
+```python
+duckdb.sql("SELECT * FROM my_df where exchange_name = 'LOG_RIMOWA-CN'")
+```
+#### Query to parquet:
+
+```python
+parquet_path = "/data/local/volume-nbg1-1/projects/duckops/data/raw/instances_silver_agg.parquet"
+duckdb.sql("COPY (SELECT DATE_TRUNC('minute', start_time) as ts_min, count(*) as instance_count, max(total_time) as max_total FROM my_df group by ts_min, total_time, order by ts_min) TO '{}' (FORMAT PARQUET)".format(parquet_path))
+```
+
+We should find the data stored in path of `parquet_path` variable
+
+#### Reading from parquet:
+
+```python
+duckdb.sql("Select * FROM read_parquet('{}')".format(parquet_path))
+```
+
+
+|        timestamp         | instance_count | max_total |
+|--------------------------|----------------|-----------|
+| 2026-03-06 01:00:00+01   |              1 |         6 |
+| 2026-03-06 01:00:00+01   |              3 |         3 |
+| 2026-03-06 01:00:00+01   |              3 |         8 |
+| 2026-03-06 01:00:00+01   |              1 |        13 |
+| 2026-03-06 01:00:00+01   |              2 |         7 |
+| 2026-03-06 01:00:00+01   |              1 |        20 |
+| 2026-03-06 01:00:00+01   |              1 |        12 |
+| 2026-03-06 01:00:00+01   |              1 |         4 |
+| 2026-03-06 01:00:00+01   |              4 |         2 |
+| 2026-03-06 01:00:00+01   |              1 |        14 |
+|           ·              |              · |         · |
+|           ·              |              · |         · |
+|           ·              |              · |         · |
+| 2026-03-06 02:17:00+01   |              1 |        23 |
+| 2026-03-06 02:17:00+01   |              1 |         7 |
+| 2026-03-06 02:18:00+01   |              1 |         5 |
+| 2026-03-06 02:30:00+01   |              2 |         0 |
+| 2026-03-06 03:30:00+01   |              1 |         0 |
+| 2026-03-06 03:35:00+01   |              1 |         0 |
+| 2026-03-06 04:00:00+01   |              1 |         0 |
+| 2026-03-06 09:00:00+01   |              1 |         0 |
+| 2026-03-06 18:11:00+01   |              1 |         0 |
+| 2026-03-06 21:00:00+01   |              2 |         0 |
+
+
+
+## Live API Data
+
+<PostApiData id="4ffb4660-3779-4423-a330-abc1c740d17f" />
+
+## Lakehouse Metrics
+
+<MetricsChart slug="duck-parquet" client:load />

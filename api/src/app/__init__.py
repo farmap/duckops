@@ -104,6 +104,26 @@ def create_app() -> FastAPI:
                     })
                 
                 return MetricResponse(labels=labels, datasets=datasets)
+            elif "instance_count" in columns and "max_total" in columns:
+                query = f"SELECT timestamp, instance_count, max_total FROM read_parquet('{post.data_path}') ORDER BY timestamp"
+                df = duckdb.query(query).df()
+                
+                # Extract sorted list of unique timestamps as strings
+                labels = sorted(df['timestamp'].astype(str).unique().tolist())
+                
+                datasets = []
+                datasets.append({
+                    "label": "Instance Count",
+                    "data": df['instance_count'].tolist(),
+                    "unit": "instances/minute"
+                })
+                datasets.append({
+                    "label": "Max Run Time",
+                    "data": df['max_total'].tolist(),
+                    "unit": "seconds"
+                })
+                
+                return MetricResponse(labels=labels, datasets=datasets)
             else:
                 query = f"SELECT timestamp, value FROM read_parquet('{post.data_path}') ORDER BY timestamp"
                 df = duckdb.query(query).df()
