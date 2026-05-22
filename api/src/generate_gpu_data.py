@@ -4,10 +4,13 @@ import numpy as np
 from datetime import datetime, timedelta
 import duckdb
 import sqlite3
+from app.config import basedir, rootdir
+from app.utils import parent_dir
 
 def generate_parquet():
-    os.makedirs("/home/farma/programming/projects/duckops/data/raw", exist_ok=True)
-    parquet_path = "/home/farma/programming/projects/duckops/data/raw/duckops-gpu-metrics.parquet"
+    data_dir = os.path.join(rootdir,"data/raw")
+    os.makedirs(data_dir, exist_ok=True)
+    parquet_path = os.path.join(data_dir, "duckops-gpu-metrics.parquet")
     
     # Generate time series data: 1 week, every 1 hour
     now = datetime.now()
@@ -54,7 +57,7 @@ def generate_parquet():
 
 def update_db(parquet_path):
     # Direct SQLite connection to avoid hanging on metadata or engine initialization
-    db_path = "/home/farma/programming/projects/duckops/api/src/instance/db.sqlite3"
+    db_path = os.path.join(parent_dir(basedir), "instance/db.sqlite3")
     if not os.path.exists(db_path):
         print(f"Database not found at {db_path}, skipping update.")
         return
@@ -65,12 +68,12 @@ def update_db(parquet_path):
         cursor = conn.cursor()
         
         # Update the existing demo post so it seamlessly points to the new GPU Parquet file
-        cursor.execute("UPDATE posts SET data_path = ? WHERE slug = ?", (parquet_path, "duckops-api-demo"))
+        cursor.execute("UPDATE posts SET data_path = ? WHERE slug = ?", (parquet_path, "bgpu-metrics"))
         conn.commit()
         if cursor.rowcount > 0:
-            print("Successfully updated database post 'duckops-api-demo' to use GPU metrics.")
+            print("Successfully updated database post 'bgpu-metrics' to use GPU metrics.")
         else:
-            print("Post 'duckops-api-demo' not found in database.")
+            print("Post 'bgpu-metrics' not found in database.")
         conn.close()
     except Exception as e:
         print(f"Database update skipped or failed: {e}")

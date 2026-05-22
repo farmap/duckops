@@ -1,5 +1,6 @@
 from distutils.util import strtobool
 import uuid
+import os
 
 
 def process_boolean_str(value):
@@ -23,3 +24,9 @@ def generate_uuid4(short=False):
         # Might reduce uniqueness because of slicing
         return uuid.uuid4().hex[:8]
     return uuid.uuid4()
+
+
+def parent_dir(path, levels=1):
+    for _ in range(levels):
+        path = os.path.dirname(path)
+    return path

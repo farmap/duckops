@@ -1,5 +1,5 @@
 pydantic~=2.13.4
-fastapi~=0.136.1
+fastapi[standard]~=0.136.1
 
 # --- Core API Framework ---
 # fastapi==0.110.0
@@ -8,7 +8,7 @@ fastapi~=0.136.1
 
 # --- Design-First & Validation ---
 # pydantic==2.6.1
-# pydantic-settings==2.1.0
+pydantic-settings==2.1.0
 datamodel-code-generator==0.25.1
 
 # --- Database (PostgreSQL & Metadata) ---
@@ -17,9 +17,9 @@ psycopg2-binary==2.9.9
 alembic==1.13.1
 
 # --- Data Exploration & Analytics ---
-# duckdb==0.10.0
-# polars==0.20.10
-# pyarrow==15.0.0  # Required for Parquet support and Polars/DuckDB integration
+duckdb==1.5.3
+polars==0.20.10
+pyarrow==15.0.0  # Required for Parquet support and Polars/DuckDB integration
 
 # --- Utilities ---
 python-dotenv==1.0.1

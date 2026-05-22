@@ -5,10 +5,13 @@ from datetime import datetime, timedelta
 import duckdb
 from app.services.db_services import Base, engine, SessionLocal
 from app.models.post import Post
+from app.config import basedir, rootdir
+from app.utils import parent_dir
 
 def generate_parquet():
-    os.makedirs("/home/farma/programming/projects/duckops/data/raw", exist_ok=True)
-    parquet_path = "/home/farma/programming/projects/duckops/data/raw/duckops-api-demo.parquet"
+    data_dir = os.path.join(rootdir,"data/raw")
+    os.makedirs(data_dir, exist_ok=True)
+    parquet_path = os.path.join(data_dir, "duckops-api-demo.parquet")
     
     # Generate time series data: 1 week, every 1 hour
     now = datetime.now()

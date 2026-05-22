@@ -5,8 +5,9 @@ from dotenv import load_dotenv
 
 from urllib.parse import quote
 
-from app.utils import process_boolean_str
-
+from app.utils import process_boolean_str, parent_dir
+basedir = os.path.abspath(os.path.dirname(__file__))
+rootdir = parent_dir(basedir, levels=3)
 load_dotenv()
 
 
